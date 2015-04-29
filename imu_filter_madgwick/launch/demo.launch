@@ -1,0 +1,28 @@
+<launch>
+
+  <include file="$(find imu_3dm_gx4)/launch/imu.launch">
+    <!-- <remap from="~imu" to="/imu/data_raw" /> -->
+    <!-- <remap from="~magnetic_field" to="/imu/mag" /> -->
+    <!-- <remap from="~filter" to="/imu/gx4_filer" /> -->
+  </include>
+
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="madgwick"
+        output="screen">
+    <remap from="/imu/data_raw" to="/gx4_imu/imu" />
+    <remap from="/imu/mag" to="/madgwick/mag" />
+
+    <remap from="/imu/data" to="/madgwick/euler" />
+
+    <param name="use_mag" value="false" />
+    <param name="publish_debug_topics" value="false" />
+    <!-- <remap from="/imu/rpy/filtered" to="/madgwick/rpy/filtered" /> -->
+    <!-- <remap from="/imu/rpy/raw" to="/madgwick/rpy/raw" /> -->
+
+
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find imu_filter_madgwick)/cfg/demo.rviz" required="true"/>
+
+
+</launch>

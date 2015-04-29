@@ -30,7 +30,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/Vector3Stamped.h>
-#include "tf2_ros/transform_broadcaster.h"
+#include <tf2_ros/transform_broadcaster.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -48,8 +48,8 @@ class ImuFilter
   typedef message_filters::Subscriber<ImuMsg> ImuSubscriber;
   typedef message_filters::Subscriber<MagMsg> MagSubscriber;
 
-  typedef imu_filter_madgwick::ImuFilterMadgwickConfig   FilterConfig;
-  typedef dynamic_reconfigure::Server<FilterConfig>   FilterConfigServer;
+  typedef imu_filter_madgwick::ImuFilterMadgwickConfig FilterConfig;
+  typedef dynamic_reconfigure::Server<FilterConfig>    FilterConfigServer;
 
   public:
 
@@ -93,7 +93,7 @@ class ImuFilter
     bool initialized_;
     double q0, q1, q2, q3;  // quaternion
     ros::Time last_time_;
-    float w_bx_, w_by_, w_bz_; //
+    float w_bx_, w_by_, w_bz_;
 
     // **** member functions
 

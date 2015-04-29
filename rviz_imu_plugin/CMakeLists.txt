@@ -14,21 +14,17 @@ add_definitions(-DQT_NO_KEYWORDS)
 ## Here we specify which header files need to be run through "moc",
 ## Qt's meta-object compiler.
 qt4_wrap_cpp(MOC_FILES
-  include/rviz_imu_plugin/imu_display.h
-)
-
+  include/rviz_imu_plugin/imu_display.h)
 
 catkin_package(
   DEPENDS 
   CATKIN_DEPENDS rviz
   INCLUDE_DIRS
-  LIBRARIES
-)
+  LIBRARIES)
 
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
-)
+  ${catkin_INCLUDE_DIRS})
 
 ## Here we specify the list of source files
 set(SOURCE_FILES  src/imu_display.cpp
@@ -48,8 +44,7 @@ install(TARGETS
   ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(FILES plugin_description.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
