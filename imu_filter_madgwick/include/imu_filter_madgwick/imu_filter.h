@@ -45,9 +45,9 @@ class ImuFilter
 
   typedef message_filters::sync_policies::ApproximateTime<ImuMsg, MagMsg> SyncPolicy;
   typedef message_filters::Synchronizer<SyncPolicy> Synchronizer;
-  typedef message_filters::Subscriber<ImuMsg> ImuSubscriber; 
+  typedef message_filters::Subscriber<ImuMsg> ImuSubscriber;
   typedef message_filters::Subscriber<MagMsg> MagSubscriber;
-  
+
   typedef imu_filter_madgwick::ImuFilterMadgwickConfig   FilterConfig;
   typedef dynamic_reconfigure::Server<FilterConfig>   FilterConfigServer;
 
@@ -62,7 +62,7 @@ class ImuFilter
 
     ros::NodeHandle nh_;
     ros::NodeHandle nh_private_;
-    
+
     boost::shared_ptr<Synchronizer> sync_;
     boost::shared_ptr<ImuSubscriber> imu_subscriber_;
     boost::shared_ptr<MagSubscriber> mag_subscriber_;
@@ -73,7 +73,7 @@ class ImuFilter
     tf2_ros::TransformBroadcaster tf_broadcaster_;
 
     boost::shared_ptr<FilterConfigServer> config_server_;
-    
+
     // **** paramaters
 
     double gain_;     // algorithm gain
@@ -93,7 +93,7 @@ class ImuFilter
     bool initialized_;
     double q0, q1, q2, q3;  // quaternion
     ros::Time last_time_;
-    float w_bx_, w_by_, w_bz_; // 
+    float w_bx_, w_by_, w_bz_; //
 
     // **** member functions
 
@@ -108,18 +108,18 @@ class ImuFilter
     void publishRawMsg(const ros::Time& t,
                        float roll, float pitch, float yaw);
 
-    void madgwickAHRSupdate(float gx, float gy, float gz, 
-                            float ax, float ay, float az, 
+    void madgwickAHRSupdate(float gx, float gy, float gz,
+                            float ax, float ay, float az,
                             float mx, float my, float mz,
                             float dt);
 
-    void madgwickAHRSupdateIMU(float gx, float gy, float gz, 
+    void madgwickAHRSupdateIMU(float gx, float gy, float gz,
                                float ax, float ay, float az,
                                float dt);
 
     void reconfigCallback(FilterConfig& config, uint32_t level);
 
-    void computeRPY(float ax, float ay, float az, 
+    void computeRPY(float ax, float ay, float az,
                     float mx, float my, float mz,
                     float& roll, float& pitch, float& yaw);
     // Fast inverse square-root

@@ -8,20 +8,16 @@ find_package(Boost REQUIRED COMPONENTS system thread signals)
 # Generate dynamic parameters
 generate_dynamic_reconfigure_options(cfg/ImuFilterMadgwick.cfg)
 
-
 catkin_package(
   DEPENDS Boost
   CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs tf2_ros nodelet pluginlib message_filters dynamic_reconfigure
   INCLUDE_DIRS
-  LIBRARIES imu_filter imu_filter_nodelet
-)
+  LIBRARIES imu_filter imu_filter_nodelet)
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
-
+  ${Boost_INCLUDE_DIRS})
 
 # create imu_filter library
 add_library (imu_filter src/imu_filter.cpp)
@@ -38,13 +34,10 @@ add_executable(imu_filter_node src/imu_filter_node.cpp)
 add_dependencies(imu_filter_node ${PROJECT_NAME}_gencfg)
 target_link_libraries(imu_filter_node imu_filter ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-
 install(TARGETS imu_filter imu_filter_nodelet imu_filter_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(FILES imu_filter_nodelet.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  )
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

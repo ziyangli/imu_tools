@@ -28,7 +28,7 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 ImuFilter::ImuFilter(ros::NodeHandle nh, ros::NodeHandle nh_private):
-  nh_(nh), 
+  nh_(nh),
   nh_private_(nh_private),
   initialized_(false),
   q0(1.0), q1(0.0), q2(0.0), q3(0.0)
@@ -56,7 +56,7 @@ ImuFilter::ImuFilter(ros::NodeHandle nh, ros::NodeHandle nh_private):
     ROS_FATAL("constant_dt parameter is %f, must be >= 0.0. Setting to 0.0", constant_dt_);
     constant_dt_ = 0.0;
   }
-  
+
   // if constant_dt_ is 0.0 (default), use IMU timestamp to determine dt
   // otherwise, it will be constant
   if (constant_dt_ == 0.0)
@@ -68,7 +68,7 @@ ImuFilter::ImuFilter(ros::NodeHandle nh, ros::NodeHandle nh_private):
   config_server_.reset(new FilterConfigServer(nh_private_));
   FilterConfigServer::CallbackType f = boost::bind(&ImuFilter::reconfigCallback, this, _1, _2);
   config_server_->setCallback(f);
-  
+
   // **** register publishers
   imu_publisher_ = nh_.advertise<sensor_msgs::Imu>(
     ros::names::resolve("imu") + "/data", 5);
@@ -114,27 +114,27 @@ void ImuFilter::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
   boost::mutex::scoped_lock(mutex_);
 
   const geometry_msgs::Vector3& ang_vel = imu_msg_raw->angular_velocity;
-  const geometry_msgs::Vector3& lin_acc = imu_msg_raw->linear_acceleration; 
-  
+  const geometry_msgs::Vector3& lin_acc = imu_msg_raw->linear_acceleration;
+
   ros::Time time = imu_msg_raw->header.stamp;
   imu_frame_ = imu_msg_raw->header.frame_id;
 
   if (!initialized_)
   {
-    // initialize roll/pitch orientation from acc. vector    
+    // initialize roll/pitch orientation from acc. vector
     double sign = copysignf(1.0, lin_acc.z);
     double roll = atan2(lin_acc.y, sign * sqrt(lin_acc.x*lin_acc.x + lin_acc.z*lin_acc.z));
     double pitch = -atan2(lin_acc.x, sqrt(lin_acc.y*lin_acc.y + lin_acc.z*lin_acc.z));
     double yaw = 0.0;
-                        
+
     tf2::Quaternion init_q;
     init_q.setRPY(roll, pitch, yaw);
-    
+
     q1 = init_q.getX();
     q2 = init_q.getY();
     q3 = init_q.getZ();
     q0 = init_q.getW();
-    
+
     // initialize time
     last_time_ = time;
     initialized_ = true;
@@ -148,7 +148,7 @@ void ImuFilter::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
     dt = (time - last_time_).toSec();
 
   last_time_ = time;
-  
+
   madgwickAHRSupdateIMU(
     ang_vel.x, ang_vel.y, ang_vel.z,
     lin_acc.x, lin_acc.y, lin_acc.z,
@@ -164,9 +164,9 @@ void ImuFilter::imuMagCallback(
   const MagMsg::ConstPtr& mag_msg)
 {
   boost::mutex::scoped_lock(mutex_);
-  
+
   const geometry_msgs::Vector3& ang_vel = imu_msg_raw->angular_velocity;
-  const geometry_msgs::Vector3& lin_acc = imu_msg_raw->linear_acceleration; 
+  const geometry_msgs::Vector3& lin_acc = imu_msg_raw->linear_acceleration;
   const geometry_msgs::Vector3& mag_fld = mag_msg->vector;
 
   ros::Time time = imu_msg_raw->header.stamp;
@@ -196,16 +196,16 @@ void ImuFilter::imuMagCallback(
 
     tf2::Quaternion init_q;
     init_q.setRPY(roll, pitch, yaw);
-    
+
     q1 = init_q.getX();
     q2 = init_q.getY();
     q3 = init_q.getZ();
     q0 = init_q.getW();
-    
+
     w_bx_ = 0;
     w_by_ = 0;
     w_bz_ = 0;
-    
+
     last_time_ = time;
     initialized_ = true;
   }
@@ -216,7 +216,7 @@ void ImuFilter::imuMagCallback(
     dt = constant_dt_;
   else
     dt = (time - last_time_).toSec();
-  
+
   last_time_ = time;
 
   madgwickAHRSupdate(
@@ -269,7 +269,7 @@ void ImuFilter::publishFilteredMsg(const ImuMsg::ConstPtr& imu_msg_raw)
 {
 
   // create and publish fitlered IMU message
-  boost::shared_ptr<ImuMsg> imu_msg = 
+  boost::shared_ptr<ImuMsg> imu_msg =
     boost::make_shared<ImuMsg>(*imu_msg_raw);
 
   imu_msg->orientation.w = q0;
@@ -312,10 +312,10 @@ void ImuFilter::publishRawMsg(const ros::Time& t,
 }
 
 void ImuFilter::computeRPY(
-  float ax, float ay, float az, 
+  float ax, float ay, float az,
   float mx, float my, float mz,
   float& roll, float& pitch, float& yaw)
-{ 
+{
   // initialize roll/pitch orientation from acc. vector.
   double sign = copysignf(1.0, az);
   roll = atan2(ay, sign * sqrt(ax*ax + az*az));
@@ -333,9 +333,9 @@ void ImuFilter::computeRPY(
 }
 
 void ImuFilter::madgwickAHRSupdate(
-  float gx, float gy, float gz, 
-  float ax, float ay, float az, 
-  float mx, float my, float mz, 
+  float gx, float gy, float gz,
+  float ax, float ay, float az,
+  float mx, float my, float mz,
   float dt)
 {
 	float recipNorm;
@@ -353,13 +353,13 @@ void ImuFilter::madgwickAHRSupdate(
 	}
 
 	// Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
-	if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) 
+    if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
   {
 		// Normalise accelerometer measurement
 		recipNorm = invSqrt(ax * ax + ay * ay + az * az);
 		ax *= recipNorm;
 		ay *= recipNorm;
-		az *= recipNorm;   
+        az *= recipNorm;
 
 		// Normalise magnetometer measurement
 		recipNorm = invSqrt(mx * mx + my * my + mz * mz);
@@ -412,15 +412,15 @@ void ImuFilter::madgwickAHRSupdate(
 		_w_err_x = _2q0 * s1 - _2q1 * s0 - _2q2 * s3 + _2q3 * s2;
 		_w_err_y = _2q0 * s2 + _2q1 * s3 - _2q2 * s0 - _2q3 * s1;
 		_w_err_z = _2q0 * s3 - _2q1 * s2 + _2q2 * s1 - _2q3 * s0;
-		
+
 		w_bx_ += _w_err_x * dt * zeta_;
 		w_by_ += _w_err_y * dt * zeta_;
 		w_bz_ += _w_err_z * dt * zeta_;
-		
+
 		gx -= w_bx_;
 		gy -= w_by_;
 		gz -= w_bz_;
-		
+
 		// Rate of change of quaternion from gyroscope
 		qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
 		qDot2 = 0.5f * ( q0 * gx + q2 * gz - q3 * gy);
@@ -455,9 +455,9 @@ void ImuFilter::madgwickAHRSupdate(
 }
 
 void ImuFilter::madgwickAHRSupdateIMU(
-  float gx, float gy, float gz, 
+  float gx, float gy, float gz,
   float ax, float ay, float az,
-  float dt) 
+  float dt)
 {
 	float recipNorm;
 	float s0, s1, s2, s3;
@@ -471,13 +471,13 @@ void ImuFilter::madgwickAHRSupdateIMU(
 	qDot4 = 0.5f * ( q0 * gz + q1 * gy - q2 * gx);
 
 	// Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
-	if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f))) 
+    if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
   {
 		// Normalise accelerometer measurement
 		recipNorm = invSqrt(ax * ax + ay * ay + az * az);
 		ax *= recipNorm;
 		ay *= recipNorm;
-		az *= recipNorm;   
+        az *= recipNorm;
 
 		// Auxiliary variables to avoid repeated arithmetic
 		_2q0 = 2.0f * q0;
@@ -539,5 +539,3 @@ void ImuFilter::reconfigCallback(FilterConfig& config, uint32_t level)
   orientation_variance_ = config.orientation_stddev * config.orientation_stddev;
   ROS_INFO("Magnetometer bias values: %f %f %f", mag_bias_.x, mag_bias_.y, mag_bias_.z);
 }
-
-
